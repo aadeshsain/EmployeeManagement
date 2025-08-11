@@ -1,9 +1,9 @@
 
-import { useNavigate } from "react-router"; // FIXED
+import { useNavigate } from "react-router";
 import { Form, Input, Button, Checkbox, message } from "antd";
-import { Link } from "react-router"; // FIXED
+import { Link } from "react-router"; 
 import AuthLayout from "./AuthLayout";
-import { loginUser } from "./authApi"; // ✅ Update path if needed
+import { loginUser } from "./authApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function LoginPage() {
 
       localStorage.setItem("access_token", res.token);
       message.success("Login successful!");
-      navigate("/dashboard");
+      navigate("/d");
     } catch (error: any) {
       message.error(error.message || "Login failed");
     }
@@ -64,7 +64,7 @@ export default function LoginPage() {
 
         <div className="text-center text-sm mt-4">
           Don't have an account?{" "}
-          <Link to="/auth/register" className="text-blue-600 hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline">
             Sign Up
           </Link>
         </div>

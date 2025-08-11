@@ -15,13 +15,13 @@ export default function Register() {
         email: values.email,
         password: values.password,
         confirmPassword: values.confirmPassword,
-        role: "employee",
+        companyName: values.CompanyName,
       };
 
       const data = await registerUser(payload);
       console.log("Registration successful:", data);
 
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error: any) {
       console.error("Registration failed:", error);
     }
@@ -33,71 +33,68 @@ export default function Register() {
       subtitle="Register to access Projects workspace and manage your team efficiently."
     >
       <h2 className="text-2xl font-semibold mb-6 text-center text-black">Register</h2>
-      <Form layout="vertical" onFinish={handleRegister}>
-        <Form.Item
-          label="Full Name"
-          name="fullname"
-          rules={[{ required: true, message: "Please input your full name!" }]}
-        >
-          <Input size="small" />
-        </Form.Item>
+     <Form layout="vertical" onFinish={handleRegister}>
 
-        <Form.Item
-          label="Email address"
-          name="email"
-          rules={[{ required: true, message: "Please input your email!" }]}
-        >
-          <Input size="small" />
-        </Form.Item>
+  <Form.Item
+    label="Full Name"
+    name="fullname"
+    rules={[{ required: true, message: "Please input your full name!" }]}
+    style={{ marginBottom: 12 }} // reduced spacing
+  >
+    <Input size="large" />
+  </Form.Item>
 
-        <Form.Item
-          label="Phone Number"
-          name="number"
-          rules={[{ required: true, message: "Please input your mobile number" }]}
-        >
-          <Input size="small" />
-        </Form.Item>
+  <Form.Item
+    label="Email address"
+    name="email"
+    rules={[{ required: true, message: "Please input your email!" }]}
+    style={{ marginBottom: 12 }}
+  >
+    <Input size="large" />
+  </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input.Password size="small" />
-        </Form.Item>
+  <Form.Item
+    label="Phone Number"
+    name="number"
+    rules={[{ required: true, message: "Please input your mobile number" }]}
+    style={{ marginBottom: 12 }}
+  >
+    <Input size="large" />
+  </Form.Item>
+   <Form.Item
+    label="Comapany Name"
+    name="CompanyName"
+    rules={[{ required: true, message: "Please input your Comapny name!" }]}
+    style={{ marginBottom: 12 }} // reduced spacing
+  >
+    <Input size="large" />
+  </Form.Item>
 
-        <Form.Item
-          label="Confirm Password"
-          name="confirmPassword"
-          dependencies={["password"]}
-          rules={[
-            { required: true, message: "Please confirm your password!" },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("password") === value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject("Passwords do not match!");
-              },
-            }),
-          ]}
-        >
-          <Input.Password size="small" />
-        </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full" size="large">
-            Create Account
-          </Button>
-        </Form.Item>
+  <Form.Item
+    label="Password"
+    name="password"
+    rules={[{ required: true, message: "Please input your password!" }]}
+    style={{ marginBottom: 12 }}
+  >
+    <Input.Password size="large" />
+  </Form.Item>
 
-        <div>
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Sign In
-          </Link>
-        </div>
-      </Form>
+  
+
+  <Form.Item style={{ marginBottom: 16 }}>
+    <Button type="primary" htmlType="submit" className="w-full" size="large">
+      Create Account
+    </Button>
+  </Form.Item>
+   <div className="text-center text-sm">
+    Already have an account?{" "}
+    <Link to="/login" className="text-blue-600 hover:underline">
+      Sign In
+    </Link>
+  </div>
+  </Form>
+
     </AuthLayout>
   );
 }

@@ -4,14 +4,14 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.BACKEND_API_BASE_URL, // 🔁 Replace with your backend URL
+  baseURL:  import.meta.env.VITE_API_URL, //  backend URL
   headers: {
   "ngrok-skip-browser-warning": "69420",
 }
   ,
 });
 
-// ✅ Request Interceptor: Attach JWT token to headers
+//Request Interceptor: Attach JWT token to headers
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token'); // or from a Redux store/context
@@ -26,7 +26,7 @@ axiosInstance.interceptors.request.use(
 );
 
 // ✅ Response Interceptor: Handle errors globally
-axiosInstance.interceptors.response.use(
+/*axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle 401 Unauthorized (e.g., token expired)
@@ -38,6 +38,6 @@ axiosInstance.interceptors.response.use(
     // Optionally show toast here or return error message
     return Promise.reject(error);
   }
-);
+);*/
 
 export default axiosInstance;
