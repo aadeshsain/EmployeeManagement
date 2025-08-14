@@ -1,8 +1,13 @@
 import { useState, useRef } from 'react';
-import { UserOutlined, CalendarOutlined, FileDoneOutlined, PlusOutlined } from '@ant-design/icons';
-import { Menu, Button, Input, theme } from 'antd';
+import {
+  UserOutlined,
+  CalendarOutlined,
+  FileDoneOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
+import { Menu, Button, Input, theme, Select, notification } from 'antd';
 import { useNavigate } from 'react-router';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 
 const Sidebar = () => {
   const {
@@ -29,43 +34,51 @@ const Sidebar = () => {
 
   const handleOk = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/api/send-invite', {
+      const response = await axiosInstance.post('/invite', {
         email,
         role: selectedRole,
       });
 
-      console.log('Invite sent:', response.data);
-      // Optionally show toast/notification here
+      notification.success({
+        message: 'Invite Sent',
+        description: `Invitation sent to ${email} as ${selectedRole}`,
+      });
 
       setIsModalOpen(false);
       setSelectedRole('');
       setEmail('');
-    } catch (error) {
-      console.error('Error sending invite:', error);
-      // Optionally show error notification
+    } catch (error: any) {
+      console.error('Error sending invite:', error.response?.data || error.message);
+      notification.error({
+        message: 'Invite Failed',
+        description: error.response?.data?.error || 'Something went wrong',
+      });
     }
   };
+
   const handleCancel = () => {
     setIsModalOpen(false);
     setSelectedRole('');
     setEmail('');
   };
 
-  // ✅ Sidebar menu items
   const items = [
     { key: 'user', icon: <UserOutlined />, label: 'User' },
     { key: 'attendance', icon: <CalendarOutlined />, label: 'Attendance' },
     { key: 'leave', icon: <FileDoneOutlined />, label: 'Leave' },
   ];
-  <Menu
-  mode="inline"
-  items={items}
-  onClick={({ key }) => navigate(`/d/${key}`)} 
-/>
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', background: colorBgContainer }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          justifyContent: 'space-between',
+          background: colorBgContainer,
+        }}
+      >
         <div>
           <div style={{ padding: 16, textAlign: 'center' }}>
             <img
@@ -75,12 +88,21 @@ const Sidebar = () => {
             />
           </div>
 
-          {/* ✅ Navigate to /d/user, /d/attendance, /d/leave */}
-          <Menu mode="inline" items={items} onClick={({ key }) => navigate(`/d/${key}`)} />
+          <Menu
+            mode="inline"
+            items={items}
+            onClick={({ key }) => navigate(`/d/${key}`)}
+          />
         </div>
 
         <div style={{ padding: 16, borderTop: '1px solid #f0f0f0' }}>
-          <Button type="primary" icon={<PlusOutlined />} block ref={buttonRef} onClick={showModal}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            block
+            ref={buttonRef}
+            onClick={showModal}
+          >
             Send Invite
           </Button>
         </div>
@@ -98,7 +120,7 @@ const Sidebar = () => {
             borderRadius: 8,
             padding: 16,
             width: 300,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           }}
         >
           <h3 style={{ marginBottom: 12 }}>Send Invite</h3>
@@ -108,23 +130,26 @@ const Sidebar = () => {
             onChange={(e) => setEmail(e.target.value)}
             style={{ marginBottom: 16 }}
           />
-          <input
-            placeholder="Enter role"
+          <Select
+            placeholder="Select role"
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              marginBottom: '16px',
-              borderRadius: '4px',
-              border: '1px solid #d9d9d9',
-            }}
+            onChange={(value) => setSelectedRole(value)}
+            options={[
+              { label: 'Manager', value: 'Manager' },
+              { label: 'Employee', value: 'Employee' },
+              { label: 'Team-Leader', value: 'Team-Leader' },
+            ]}
+            style={{ marginBottom: 16, width: '100%' }}
           />
           <div style={{ textAlign: 'right' }}>
             <Button onClick={handleCancel} style={{ marginRight: 8 }}>
               Cancel
             </Button>
-            <Button type="primary" onClick={handleOk} disabled={!selectedRole || !email}>
+            <Button
+              type="primary"
+              onClick={handleOk}
+              disabled={!selectedRole || !email}
+            >
               Send
             </Button>
           </div>
