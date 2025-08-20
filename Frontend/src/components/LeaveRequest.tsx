@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   Form,
@@ -8,60 +8,106 @@ import {
   Button,
   Row,
   Col,
-  message,
+  notification,
 } from 'antd';
+import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import type { RangePickerProps } from 'antd/es/date-picker';
+import axios from 'axios';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
+// Axios instance
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:5000/api', // Replace with your backend URL
+  headers: { 'Content-Type': 'application/json' },
+});
+
 const LeaveRequest: React.FC = () => {
   const [form] = Form.useForm();
 
+  // 🔹 Mutation using React Query
+  const leaveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await axiosInstance.post('/leave-request', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      notification.success({
+        message: 'Leave Submitted',
+        description: 'Your leave request has been successfully submitted.',
+      });
+      form.resetFields();
+    },
+    onError: (error: any) => {
+      notification.error({
+        message: 'Submission Failed',
+        description:
+          error?.response?.data?.error || error?.message || 'Something went wrong!',
+      });
+    },
+  });
+
+  // 🔹 Form submit handler
   const onFinish = (values: any) => {
-    console.log('Form Values:', values);
-    message.success('Leave application submitted');
-    form.resetFields();
+    const payload = {
+      leaveType: values.leaveType,
+      startDate: dayjs(values.dateRange[0]).format('YYYY-MM-DD'),
+      endDate: dayjs(values.dateRange[1]).format('YYYY-MM-DD'),
+      email: values.email,
+      reason: values.reason,
+    };
+    leaveMutation.mutate(payload);
   };
 
+  // 🔹 Cancel handler
   const onCancel = () => {
     form.resetFields();
+    leaveMutation.reset();
   };
 
   return (
-    <Card title="Leave Application" style={{ maxWidth: 600, margin: 'auto' }}>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-      >
+    <Card
+      title="Leave Application"
+      style={{
+        maxWidth: 700,
+        margin: '40px auto',
+        borderRadius: 12,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        background: '#fafafa',
+      }}
+    >
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        {/* Leave Type */}
         <Form.Item
           label="Leave Type"
           name="leaveType"
           rules={[{ required: true, message: 'Please select leave type' }]}
         >
-          <Select placeholder="Select">
+          <Select placeholder="Select Leave Type">
             <Option value="sick">Sick Leave</Option>
             <Option value="casual">Casual Leave</Option>
             <Option value="earned">Earned Leave</Option>
           </Select>
         </Form.Item>
 
+        {/* Leave Dates */}
         <Form.Item
-          label="Date"
+          label="Leave Dates"
           name="dateRange"
           rules={[{ required: true, message: 'Please select date range' }]}
         >
           <RangePicker
-            format="DD-MMM-YYYY"
             style={{ width: '100%' }}
+            format="DD-MMM-YYYY"
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
           />
         </Form.Item>
 
+        {/* Team Email */}
         <Form.Item
-          label="Team Email ID"
+          label="Team Email"
           name="email"
           rules={[
             { required: true, message: 'Please enter team email' },
@@ -71,6 +117,7 @@ const LeaveRequest: React.FC = () => {
           <Input placeholder="example@team.com" />
         </Form.Item>
 
+        {/* Reason */}
         <Form.Item
           label="Reason for Leave"
           name="reason"
@@ -79,12 +126,26 @@ const LeaveRequest: React.FC = () => {
           <TextArea rows={4} placeholder="Enter reason for leave" />
         </Form.Item>
 
+        {/* Buttons */}
         <Row justify="end" gutter={8}>
           <Col>
-            <Button onClick={onCancel}>Cancel</Button>
-          </Col>
-          <Col>
-            <Button type="primary" htmlType="submit">Submit</Button>
+<Button
+  type="primary"
+  htmlType="submit"
+  loading={leaveMutation.status === 'pending'}
+>
+  Submit
+</Button>
+
+<Button
+  onClick={onCancel}
+  disabled={leaveMutation.status === 'pending'}
+  style={{ marginLeft: 8 }}
+>
+  Cancel
+</Button>
+
+
           </Col>
         </Row>
       </Form>

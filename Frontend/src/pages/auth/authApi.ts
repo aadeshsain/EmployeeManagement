@@ -1,63 +1,71 @@
-
 import axiosInstance from "../../api/axiosInstance";
 
+// 🔹 Helper: Centralized Error Handler
+const handleError = (error: any, defaultMsg: string) => {
+  console.error("❌ API Error:", {
+    status: error?.response?.status,
+    data: error?.response?.data,
+    message: error.message,
+  });
+
+  return (
+    error?.response?.data?.message ||
+    error?.response?.data?.error ||
+    defaultMsg
+  );
+};
+
+// ✅ Register User
 export const registerUser = async (userData: {
   name: string;
   email: string;
   password: string;
-  confirmPassword: string; // Add this!
+  companyName: string;
+  number: string;
   role?: string;
 }) => {
-   
   try {
-
-    const response = await axiosInstance.post('/auth/register-user', userData, {
-      headers: {
-        'ngrok-skip-browser-warning': '69420',
-      },
+    const response = await axiosInstance.post("/auth/register-user", userData, {
+      headers: { "ngrok-skip-browser-warning": "69420" },
     });
-    
     return response.data;
   } catch (error: any) {
-    console.error('📛 Registration failed:', error?.response?.data || error.message);
-
-    const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      'Registration failed. Please try again.';
-
-    throw new Error(message);
+    throw new Error(handleError(error, "Registration failed. Please try again."));
   }
 };
+
+// ✅ Login User
 export const loginUser = async (credentials: {
   email: string;
   password: string;
 }) => {
   try {
-   
-    const response = await axiosInstance.post('/auth/login', credentials, {
+    const response = await axiosInstance.post("/auth/login", credentials, {
       headers: {
-        'ngrok-skip-browser-warning': '69420',
-        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": "69420",
+        "Content-Type": "application/json",
       },
     });
-    console.log("Login response:", response.data);
-    return response.data; 
-   // should return { token: '...', user: {...} }
+
+    const { token, user } = response.data;
+
+    // 🔹 Save token + user info
+    if (token) localStorage.setItem("access_token", token);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+
+    return response.data;
   } catch (error: any) {
-    const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      'Login failed. Please try again.';
-    throw new Error(message);
+    throw new Error(handleError(error, "Login failed. Please try again."));
   }
 };
+
+// ✅ Create Company
 export const createCompany = async (companyData: {
   companyName: string;
   companyEmail: string;
 }) => {
   try {
-    const token = localStorage.getItem("access_token"); // ✅ FIXED
+    const token = localStorage.getItem("access_token");
 
     const response = await axiosInstance.post("/auth/create-company", companyData, {
       headers: {
@@ -67,20 +75,16 @@ export const createCompany = async (companyData: {
       },
     });
 
-    console.log("✅ Company creation response:", response.data);
     return response.data;
-
   } catch (error: any) {
-    console.error("❌ Company creation failed:");
-    console.error("Error object:", error);
-    console.error("Error response data:", error?.response?.data);
-    console.error("Error message:", error.message);
-
-    const message =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      "Company registration failed. Please try again.";
-
-    throw new Error(message);
+    throw new Error(handleError(error, "Company registration failed. Please try again."));
   }
 };
+
+// ✅ Logout Utility
+export const logoutUser = () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user");
+  window.location.href = "/login"; // redirect
+};
+            

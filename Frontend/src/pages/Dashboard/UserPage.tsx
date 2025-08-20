@@ -1,7 +1,7 @@
-/*import { Card, Row, Col, Avatar, Typography, Tag, message, Skeleton } from 'antd';
+import { Card, Row, Col, Avatar, Typography, Tag, message, Skeleton } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import { fetchAllUsers } from './userApi'; // Adjust the import path as necessary
+import { fetchAllUsers } from './userApi';
 
 const { Title } = Typography;
 
@@ -12,7 +12,7 @@ const UserPage = () => {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const data = await fetchAllUsers(); // 👈 from API file
+        const data = await fetchAllUsers();
         setUsers(data);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -69,11 +69,9 @@ const UserPage = () => {
 };
 
 export default UserPage;
-*/
-import React from 'react'
 
-export default function UserPage() {
-  return (
-    <div>UserPage</div>
-  )
-}
+// export default function UserPage() {
+//   return (
+//     <div>UserPage</div>
+//   )
+// }

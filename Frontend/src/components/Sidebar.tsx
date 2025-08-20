@@ -1,54 +1,48 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   UserOutlined,
   CalendarOutlined,
   FileDoneOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { Menu, Button, Input, theme, Select, notification } from 'antd';
-import { useNavigate } from 'react-router';
+import { Menu, Button, Modal, Input, Select, notification, theme } from 'antd';
+import { useNavigate, useLocation } from 'react-router';
 import axiosInstance from '../api/axiosInstance';
 
 const Sidebar = () => {
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+  const { token } = theme.useToken();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('');
   const [email, setEmail] = useState('');
-  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [role, setRole] = useState('');
 
-  const showModal = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setModalPosition({
-        top: rect.top - 200,
-        left: rect.left,
-      });
-    }
-    setIsModalOpen(true);
-  };
+  const items = [
+  { key: 'profile', icon: <UserOutlined />, label: 'Profile' },
+  { key: 'user', icon: <UserOutlined />, label: 'User' },
+  { key: 'attendance', icon: <CalendarOutlined />, label: 'Attendance' },
+  { key: 'leave', icon: <FileDoneOutlined />, label: 'Leave' },
+  { key: 'tasks', icon: <FileDoneOutlined />, label: 'Tasks' },
+];
 
-  const handleOk = async () => {
+
+  const pathParts = location.pathname.split('/');
+  const selectedKey = pathParts[1] === 'd' ? pathParts[2] : '';
+
+  const handleMenuClick = (key: string) => navigate(`/d/${key}`);
+
+  const handleInvite = async () => {
     try {
-      const response = await axiosInstance.post('/invite', {
-        email,
-        role: selectedRole,
-      });
-
+      await axiosInstance.post('/invite', { email, role });
       notification.success({
         message: 'Invite Sent',
-        description: `Invitation sent to ${email} as ${selectedRole}`,
+        description: `Invitation sent to ${email} as ${role}`,
       });
-
       setIsModalOpen(false);
-      setSelectedRole('');
       setEmail('');
+      setRole('');
     } catch (error: any) {
-      console.error('Error sending invite:', error.response?.data || error.message);
       notification.error({
         message: 'Invite Failed',
         description: error.response?.data?.error || 'Something went wrong',
@@ -56,106 +50,74 @@ const Sidebar = () => {
     }
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setSelectedRole('');
-    setEmail('');
-  };
-
-  const items = [
-    { key: 'user', icon: <UserOutlined />, label: 'User' },
-    { key: 'attendance', icon: <CalendarOutlined />, label: 'Attendance' },
-    { key: 'leave', icon: <FileDoneOutlined />, label: 'Leave' },
-  ];
-
   return (
-    <>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          justifyContent: 'space-between',
-          background: colorBgContainer,
-        }}
-      >
-        <div>
-          <div style={{ padding: 16, textAlign: 'center' }}>
-            <img
-              src="https://images.unsplash.com/photo-1660303238885-c9853ddb6feb?w=600"
-              alt="logo"
-              style={{ height: 60, width: 60, margin: '0 auto 16px' }}
-            />
-          </div>
-
-          <Menu
-            mode="inline"
-            items={items}
-            onClick={({ key }) => navigate(`/d/${key}`)}
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        background: token.colorBgContainer,
+      }}
+    >
+      <div>
+        <div style={{ padding: 16, textAlign: 'center' }}>
+          <img
+            src="https://images.unsplash.com/photo-1660303238885-c9853ddb6feb?w=600"
+            alt="logo"
+            style={{ height: 60, width: 60, borderRadius: '50%', marginBottom: 12 }}
           />
+          <h2 style={{ color: token.colorTextBase }}>Dashboard</h2>
         </div>
 
-        <div style={{ padding: 16, borderTop: '1px solid #f0f0f0' }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            block
-            ref={buttonRef}
-            onClick={showModal}
-          >
-            Send Invite
-          </Button>
-        </div>
+        <Menu
+          mode="inline"
+          theme="light"
+          selectedKeys={[selectedKey]}
+          items={items}
+          onClick={({ key }) => handleMenuClick(key)}
+          style={{ borderRight: 0 }}
+        />
       </div>
 
-      {isModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: modalPosition.top,
-            left: modalPosition.left,
-            zIndex: 1300,
-            background: 'white',
-            border: '1px solid #ccc',
-            borderRadius: 8,
-            padding: 16,
-            width: 300,
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          }}
+      <div style={{ padding: 16, borderTop: '1px solid #f0f0f0' }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          block
+          onClick={() => setIsModalOpen(true)}
         >
-          <h3 style={{ marginBottom: 12 }}>Send Invite</h3>
-          <Input
-            placeholder="Enter email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ marginBottom: 16 }}
-          />
-          <Select
-            placeholder="Select role"
-            value={selectedRole}
-            onChange={(value) => setSelectedRole(value)}
-            options={[
-              { label: 'Manager', value: 'Manager' },
-              { label: 'Employee', value: 'Employee' },
-              { label: 'Team-Leader', value: 'Team-Leader' },
-            ]}
-            style={{ marginBottom: 16, width: '100%' }}
-          />
-          <div style={{ textAlign: 'right' }}>
-            <Button onClick={handleCancel} style={{ marginRight: 8 }}>
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={handleOk}
-              disabled={!selectedRole || !email}
-            >
-              Send
-            </Button>
-          </div>
-        </div>
-      )}
-    </>
+          Send Invite
+        </Button>
+      </div>
+
+      {/* Invite Modal */}
+      <Modal
+        title="Send Invite"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={handleInvite}
+        okButtonProps={{ disabled: !email || !role }}
+      >
+        <Input
+          placeholder="Enter email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ marginBottom: 16 }}
+        />
+        <Select
+          placeholder="Select role"
+          value={role}
+          onChange={(val) => setRole(val)}
+          options={[
+            { label: 'Manager', value: 'Manager' },
+            { label: 'Employee', value: 'Employee' },
+            { label: 'Team-Leader', value: 'Team-Leader' },
+          ]}
+          style={{ width: '100%' }}
+        />
+      </Modal>
+    </div>
   );
 };
 
