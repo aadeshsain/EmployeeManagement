@@ -24,6 +24,7 @@ const Sidebar = () => {
   { key: 'attendance', icon: <CalendarOutlined />, label: 'Attendance' },
   { key: 'leave', icon: <FileDoneOutlined />, label: 'Leave' },
   { key: 'tasks', icon: <FileDoneOutlined />, label: 'Tasks' },
+  { key: 'projects', icon: <FileDoneOutlined />, label: 'Projects' },
 ];
 
 

@@ -12,22 +12,15 @@ import {
 } from 'antd';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
-// Axios instance
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/api', // Replace with your backend URL
-  headers: { 'Content-Type': 'application/json' },
-});
-
 const LeaveRequest: React.FC = () => {
   const [form] = Form.useForm();
 
-  // 🔹 Mutation using React Query
   const leaveMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await axiosInstance.post('/leave-request', data);
@@ -49,7 +42,6 @@ const LeaveRequest: React.FC = () => {
     },
   });
 
-  // 🔹 Form submit handler
   const onFinish = (values: any) => {
     const payload = {
       leaveType: values.leaveType,
@@ -61,7 +53,6 @@ const LeaveRequest: React.FC = () => {
     leaveMutation.mutate(payload);
   };
 
-  // 🔹 Cancel handler
   const onCancel = () => {
     form.resetFields();
     leaveMutation.reset();
@@ -79,7 +70,6 @@ const LeaveRequest: React.FC = () => {
       }}
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        {/* Leave Type */}
         <Form.Item
           label="Leave Type"
           name="leaveType"
@@ -92,7 +82,6 @@ const LeaveRequest: React.FC = () => {
           </Select>
         </Form.Item>
 
-        {/* Leave Dates */}
         <Form.Item
           label="Leave Dates"
           name="dateRange"
@@ -105,7 +94,6 @@ const LeaveRequest: React.FC = () => {
           />
         </Form.Item>
 
-        {/* Team Email */}
         <Form.Item
           label="Team Email"
           name="email"
@@ -117,7 +105,6 @@ const LeaveRequest: React.FC = () => {
           <Input placeholder="example@team.com" />
         </Form.Item>
 
-        {/* Reason */}
         <Form.Item
           label="Reason for Leave"
           name="reason"
@@ -126,26 +113,23 @@ const LeaveRequest: React.FC = () => {
           <TextArea rows={4} placeholder="Enter reason for leave" />
         </Form.Item>
 
-        {/* Buttons */}
         <Row justify="end" gutter={8}>
           <Col>
-<Button
-  type="primary"
-  htmlType="submit"
-  loading={leaveMutation.status === 'pending'}
->
-  Submit
-</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={leaveMutation.status === 'pending'}
+            >
+              Submit
+            </Button>
 
-<Button
-  onClick={onCancel}
-  disabled={leaveMutation.status === 'pending'}
-  style={{ marginLeft: 8 }}
->
-  Cancel
-</Button>
-
-
+            <Button
+              onClick={onCancel}
+              disabled={leaveMutation.status === 'pending'}
+              style={{ marginLeft: 8 }}
+            >
+              Cancel
+            </Button>
           </Col>
         </Row>
       </Form>
