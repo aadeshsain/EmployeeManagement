@@ -18,7 +18,7 @@ const AppRouter = () => {
       {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/create-company" element={<CompanyRegisteration />} />
+      <Route path="/create-company" element={<CompanyRegisteration />} /> 
 
       {/* Dashboard Routes */}
       <Route path="/d" element={<LayoutWrapper />}>
